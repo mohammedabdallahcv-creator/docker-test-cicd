@@ -1,0 +1,4 @@
+# Dockerfile Analysis Report
+Language: dockerfile
+Dependencies:
+- ubuntu:20.04  [docker]
