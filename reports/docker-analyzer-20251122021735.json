@@ -1,0 +1,6 @@
+# Dockerfile Analysis Report
+Language: python
+Dependencies:
+- flask 2.3.3 [pypi]
+- requests 2.31.0 [pypi]
+- uvicorn 0.23.2 [pypi]
