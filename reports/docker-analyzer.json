@@ -1,5 +1,4 @@
 # Dockerfile Analysis Report
 Language: dockerfile
 Dependencies:
-- python:3.9-slim as builder  [docker]
-- python:3.9-slim  [docker]
+- ubuntu:20.04  [docker]
