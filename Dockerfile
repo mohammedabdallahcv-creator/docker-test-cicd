@@ -1,109 +1,98 @@
+# =================================================================================================
+# --- Best practices and explanations are included in the comments of this Dockerfile. ---
 #
-# ------------------ .dockerignore HINT ------------------ #
-# It's crucial to have a .dockerignore file in the same directory as your Dockerfile
-# to prevent copying unnecessary or sensitive files into your image. This speeds up
-# builds and improves security.
+# A .dockerignore file is crucial for keeping the build context small and avoiding
+# leaking secrets. Create a .dockerignore file in the same directory with at least:
 #
-# Example .dockerignore:
-#
-# node_modules
-# npm-debug.log
 # .git
 # .gitignore
-# .env
+# .dockerignore
+# node_modules
+# npm-debug.log
 # Dockerfile
 # README.md
+# *.env
 #
-# -------------------------------------------------------- #
+# =================================================================================================
 
-# Use a specific version of Node.js for reproducibility.
-# Using 'ARG' allows these to be easily updated or overridden at build time.
-ARG NODE_VERSION=18.19.1
-# Using the 'slim' variant as a base for the final image reduces its size.
-# The builder stage uses the full 'bullseye' image to ensure build tools are available.
-ARG NODE_IMAGE=node
 
-# ======================================================================================
+# =================================================================================================
 # BUILDER STAGE
-# This stage installs all dependencies (including devDependencies), transpiles code
-# (if necessary), and prepares the application for the production stage.
-# ======================================================================================
-FROM ${NODE_IMAGE}:${NODE_VERSION}-bullseye AS builder
+# Use a specific version of Node.js for reproducible builds.
+# 'alpine' images are smaller, which leads to faster downloads and smaller image sizes.
+# Naming the stage 'builder' for clarity.
+# =================================================================================================
+FROM node:18.20.2-alpine3.19 AS builder
 
 # Set the working directory in the container.
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker's layer caching.
-# This layer is only rebuilt if these files change.
-COPY package.json package-lock.json ./
+# Copy package.json and package-lock.json (or yarn.lock, etc.)
+# This is done in a separate layer to leverage Docker's layer caching.
+# This layer will only be invalidated if these package files change.
+COPY package*.json ./
 
-# Install all dependencies, including devDependencies needed for the build process.
-# 'npm ci' is used for deterministic, fast, and secure installs based on package-lock.json.
-RUN npm ci
+# Install production dependencies using 'npm ci'.
+# 'npm ci' is faster, more reliable, and strictly uses the package-lock.json,
+# which is ideal for production builds.
+# The --omit=dev flag ensures that development dependencies are not installed.
+RUN npm ci --omit=dev
 
-# Copy the rest of the application's source code.
+# Copy the rest of the application source code into the container.
+# The .dockerignore file will prevent unnecessary files from being copied.
 COPY . .
 
-# Run the build script if it exists (e.g., for TypeScript, React, Vue, etc.).
-# If your application doesn't have a build step, you can safely remove this line.
-RUN npm run build
+# If your application has a build step (e.g., transpiling TypeScript), it would go here.
+# For example: RUN npm run build
 
-# Remove development dependencies to prepare for the production stage.
-# This leaves only the packages required to run the application.
-RUN npm prune --production
 
-# ======================================================================================
-# FINAL STAGE
-# This stage creates the final, lean, and secure production image. It copies only
-# the necessary artifacts from the builder stage.
-# ======================================================================================
-FROM ${NODE_IMAGE}:${NODE_VERSION}-slim AS final
+# =================================================================================================
+# PRODUCTION STAGE
+# Start a new, clean stage from the same base image to keep the final image minimal.
+# This ensures that no build tools or development dependencies end up in the production image.
+# =================================================================================================
+FROM node:18.20.2-alpine3.19
 
-# Set the environment to 'production'. This can enable performance optimizations
-# in libraries like Express.js and disables debugging features.
-ENV NODE_ENV=production
-
-# Create a dedicated, non-root user and group for the application.
-# Running as a non-root user is a critical security best practice.
-# The user and group IDs (1001) are chosen to be consistent and avoid conflicts.
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
+# Add Open Container Initiative (OCI) labels for image metadata.
+# This is useful for image scanners and management tools.
+# See https://github.com/opencontainers/image-spec/blob/main/annotations.md
+LABEL org.opencontainers.image.authors="your-name@example.com"
+LABEL org.opencontainers.image.source="https://github.com/your-repo/your-project"
+LABEL org.opencontainers.image.description="Production image for the Node.js application."
+LABEL org.opencontainers.image.licenses="MIT"
 
 # Set the working directory.
 WORKDIR /app
 
-# Copy the pruned node_modules, package.json, and built application from the builder stage.
-# The --chown flag sets the ownership of the copied files to the non-root user.
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
-# If you have a build step, your output is likely in a 'dist' folder.
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-# If you do NOT have a build step, copy your source code instead (e.g., a 'src' folder).
-# COPY --from=builder --chown=nodejs:nodejs /app/src ./src
+# Create a dedicated, non-root user and group for the application.
+# Running as a non-root user is a critical security best practice to mitigate
+# potential container breakout vulnerabilities.
+RUN addgroup -S --gid 1001 appgroup && \
+    adduser -S --uid 1001 appuser -G appgroup
 
-# Switch to the non-root user. Subsequent commands will run as this user.
-USER nodejs
+# Copy dependencies and source code from the 'builder' stage.
+# The --chown flag sets the ownership of the copied files to the new non-root user.
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app .
 
-# Add OCI (Open Container Initiative) labels for metadata.
-# This helps with image organization and automation.
-LABEL org.opencontainers.image.source="https://your-repo-url-here.com"
-LABEL org.opencontainers.image.description="Production image for the Node.js application"
-LABEL org.opencontainers.image.licenses="MIT"
+# Switch to the non-root user. Subsequent commands will be run as this user.
+USER appuser
 
-# Expose the port the application will run on.
-# This is documentation for the user and a hint for tools.
+# Expose the port that the application listens on.
+# This is for documentation and to allow easy mapping from the host.
 EXPOSE 3000
 
-# Add a healthcheck to ensure the container is running properly.
-# Docker and orchestrators like Kubernetes use this to determine the container's health.
-# Adjust the endpoint '/healthz' to your application's actual health check endpoint.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD [ "curl", "-f", "http://localhost:3000/healthz" ] || exit 1
+# Add a healthcheck to your container.
+# Docker will use this to check if your application is still alive and healthy.
+# The node:alpine image includes 'wget', which is used here.
+# Customize the endpoint (e.g., '/healthz') for your application's health check.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1
 
 # Define the command to run the application.
-# Using 'node' directly (instead of 'npm start') makes the Node.js process PID 1,
-# which helps it receive signals like SIGTERM correctly for graceful shutdowns.
-# Ensure the path points to your application's entrypoint file.
-CMD [ "node", "dist/index.js" ]
-# If you don't have a build step, your command might look like this:
-# CMD [ "node", "src/index.js" ]
+# Use 'node' directly instead of 'npm start' to ensure that your application
+# is PID 1. This allows it to receive signals (like SIGTERM) from the Docker daemon,
+# enabling graceful shutdowns.
+# Ensure your application's code handles SIGINT/SIGTERM for a clean exit.
+# Replace 'server.js' with the actual entrypoint of your application.
+CMD [ "node", "server.js" ]
