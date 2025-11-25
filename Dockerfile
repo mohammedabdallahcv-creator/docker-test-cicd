@@ -1,109 +1,110 @@
 #
-# ------------------ .dockerignore HINT ------------------ #
-# It's crucial to have a .dockerignore file in the same directory as your Dockerfile
-# to prevent copying unnecessary or sensitive files into your image. This speeds up
-# builds and improves security.
+# --- Stage 1: Build ---
 #
-# Example .dockerignore:
+# Use a specific version of Node.js for reproducible builds.
+# The 'alpine' variant is used for its small size.
+# We name this stage 'builder' to be able to refer to it in the next stage.
 #
-# node_modules
-# npm-debug.log
-# .git
-# .gitignore
-# .env
-# Dockerfile
-# README.md
-#
-# -------------------------------------------------------- #
-
-# Use a specific version of Node.js for reproducibility.
-# Using 'ARG' allows these to be easily updated or overridden at build time.
-ARG NODE_VERSION=18.19.1
-# Using the 'slim' variant as a base for the final image reduces its size.
-# The builder stage uses the full 'bullseye' image to ensure build tools are available.
-ARG NODE_IMAGE=node
-
-# ======================================================================================
-# BUILDER STAGE
-# This stage installs all dependencies (including devDependencies), transpiles code
-# (if necessary), and prepares the application for the production stage.
-# ======================================================================================
-FROM ${NODE_IMAGE}:${NODE_VERSION}-bullseye AS builder
+FROM node:18.19.1-alpine AS builder
 
 # Set the working directory in the container.
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to leverage Docker's layer caching.
-# This layer is only rebuilt if these files change.
-COPY package.json package-lock.json ./
+# IMPORTANT: Create a .dockerignore file in your project root to exclude
+# files and directories that are not needed in the image, such as:
+#
+# node_modules
+# .git
+# .env
+# Dockerfile
+#
+# This improves build times and security.
 
-# Install all dependencies, including devDependencies needed for the build process.
-# 'npm ci' is used for deterministic, fast, and secure installs based on package-lock.json.
+# Copy package.json and package-lock.json (or yarn.lock, etc.).
+# This is done in a separate step to leverage Docker's layer caching.
+# The 'npm ci' step will only be re-run if these files change.
+COPY package*.json ./
+
+# Use 'npm ci' (clean install) for deterministic and faster installs.
+# It strictly uses the package-lock.json, which is ideal for production builds.
+# It installs all dependencies, including devDependencies, which might be needed
+# for building or testing the application in this stage.
 RUN npm ci
 
-# Copy the rest of the application's source code.
+# Copy the rest of the application source code into the container.
+# This is done after installing dependencies, as source code changes more frequently.
 COPY . .
 
-# Run the build script if it exists (e.g., for TypeScript, React, Vue, etc.).
-# If your application doesn't have a build step, you can safely remove this line.
-RUN npm run build
+# If your application needs a build step (e.g., transpiling TypeScript, bundling assets),
+# it would go here. For example:
+# RUN npm run build
 
-# Remove development dependencies to prepare for the production stage.
-# This leaves only the packages required to run the application.
-RUN npm prune --production
+#
+# --- Stage 2: Production ---
+#
+# Use the same small and secure Node.js Alpine base image.
+# This final image will only contain the files needed to run the application,
+# resulting in a smaller attack surface and faster deployment.
+#
+FROM node:18.19.1-alpine
 
-# ======================================================================================
-# FINAL STAGE
-# This stage creates the final, lean, and secure production image. It copies only
-# the necessary artifacts from the builder stage.
-# ======================================================================================
-FROM ${NODE_IMAGE}:${NODE_VERSION}-slim AS final
+# Set Open Container Initiative (OCI) labels for image metadata.
+# This helps with image organization and provides useful information.
+# Learn more at: https://github.com/opencontainers/image-spec/blob/main/annotations.md
+LABEL org.opencontainers.image.title="production-node-app" \
+      org.opencontainers.image.description="A production-ready Node.js application." \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.source="https://github.com/your-org/your-repo" \
+      org.opencontainers.image.authors="Your Name <you@example.com>"
 
-# Set the environment to 'production'. This can enable performance optimizations
-# in libraries like Express.js and disables debugging features.
+# Set the environment to 'production'.
+# This is a standard convention that many libraries and frameworks use to
+# enable production-specific optimizations (e.g., caching, logging).
 ENV NODE_ENV=production
 
 # Create a dedicated, non-root user and group for the application.
-# Running as a non-root user is a critical security best practice.
-# The user and group IDs (1001) are chosen to be consistent and avoid conflicts.
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodejs
+# Using a static UID/GID is a good practice for predictable permissions.
+# Running as a non-root user is a critical security best practice to
+# limit the blast radius in case of a container compromise.
+RUN addgroup -S -g 1001 appgroup && \
+    adduser -S -u 1001 -G appgroup appuser
+
+# Install curl, which is required for the HEALTHCHECK.
+# Using --no-cache avoids storing the package index, keeping the image layer small.
+RUN apk add --no-cache curl
 
 # Set the working directory.
 WORKDIR /app
 
-# Copy the pruned node_modules, package.json, and built application from the builder stage.
-# The --chown flag sets the ownership of the copied files to the non-root user.
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
-# If you have a build step, your output is likely in a 'dist' folder.
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-# If you do NOT have a build step, copy your source code instead (e.g., a 'src' folder).
-# COPY --from=builder --chown=nodejs:nodejs /app/src ./src
+# Copy package files from the 'builder' stage.
+COPY --from=builder /app/package*.json ./
 
-# Switch to the non-root user. Subsequent commands will run as this user.
-USER nodejs
+# Install *only* the production dependencies.
+# The --omit=dev flag ensures devDependencies are not installed,
+# resulting in a smaller and more secure final image.
+RUN npm ci --omit=dev
 
-# Add OCI (Open Container Initiative) labels for metadata.
-# This helps with image organization and automation.
-LABEL org.opencontainers.image.source="https://your-repo-url-here.com"
-LABEL org.opencontainers.image.description="Production image for the Node.js application"
-LABEL org.opencontainers.image.licenses="MIT"
+# Copy the application code (or build output) from the 'builder' stage.
+# The --chown flag sets the ownership to our non-root user, so we don't
+# have to run 'chown' in a separate, less efficient layer.
+COPY --from=builder --chown=appuser:appgroup /app/ .
 
-# Expose the port the application will run on.
-# This is documentation for the user and a hint for tools.
+# Switch to the non-root user for all subsequent commands.
+USER appuser
+
+# Expose the port the application listens on.
+# This is documentation for the user/operator; it does not publish the port.
 EXPOSE 3000
 
-# Add a healthcheck to ensure the container is running properly.
-# Docker and orchestrators like Kubernetes use this to determine the container's health.
-# Adjust the endpoint '/healthz' to your application's actual health check endpoint.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD [ "curl", "-f", "http://localhost:3000/healthz" ] || exit 1
+# Add a HEALTHCHECK instruction.
+# Docker uses this to determine if the container is healthy.
+# It attempts to curl the root path every 30 seconds. Adjust the CMD as needed
+# for your application's health endpoint (e.g., /healthz).
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD [ "curl", "-f", "http://localhost:3000/" ]
 
 # Define the command to run the application.
-# Using 'node' directly (instead of 'npm start') makes the Node.js process PID 1,
-# which helps it receive signals like SIGTERM correctly for graceful shutdowns.
-# Ensure the path points to your application's entrypoint file.
-CMD [ "node", "dist/index.js" ]
-# If you don't have a build step, your command might look like this:
-# CMD [ "node", "src/index.js" ]
+# Use the array syntax ('exec' form) to avoid shell wrapping. This allows signals
+# like SIGTERM (from 'docker stop') to be passed directly to the Node.js process,
+# enabling graceful shutdowns.
+CMD ["npm", "start"]
