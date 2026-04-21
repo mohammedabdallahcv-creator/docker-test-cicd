@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - "autofix/**"
   pull_request:
     branches:
       - main
@@ -13,16 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Print event info
-        run: |
-          echo "Event: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Actor: ${{ github.actor }}"
-
-      - name: Success
-        run: echo "Test workflow passed successfully"
+      - name: Hello
+        run: echo "Hello from ShieldOps ✅"
