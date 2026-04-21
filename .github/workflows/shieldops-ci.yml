@@ -12,7 +12,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Hello
-        run: echo "Hello from ShieldOps ✅"
+        run: echo "Hello from ShieldOps"
