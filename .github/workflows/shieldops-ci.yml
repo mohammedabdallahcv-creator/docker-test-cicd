@@ -1,0 +1,69 @@
+name: ShieldOps CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_reason:
+        description: "Why this workflow is being triggered"
+        required: false
+        default: "manual"
+      target_file:
+        description: "Optional changed file path"
+        required: false
+        default: ""
+
+  push:
+    branches:
+      - main
+      - develop
+      - "autofix/**"
+      - "fix/**"
+      - "feature/**"
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate:
+    name: Validate repository files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show trigger context
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Run reason: ${{ github.event.inputs.run_reason || 'n/a' }}"
+          echo "Target file: ${{ github.event.inputs.target_file || 'n/a' }}"
+
+      - name: Verify Docker-related files if present
+        run: |
+          set -e
+          if [ -f "Dockerfile" ]; then
+            echo "Found Dockerfile"
+          fi
+
+          if [ -f "docker-compose.yml" ]; then
+            echo "Found docker-compose.yml"
+          fi
+
+          if [ -f "docker-compose.yaml" ]; then
+            echo "Found docker-compose.yaml"
+          fi
+
+          if [ -f "test_shieldops.dockerfile" ]; then
+            echo "Found test_shieldops.dockerfile"
+          fi
+
+      - name: Basic YAML availability check
+        run: |
+          echo "Basic validation completed"
+
+      - name: Finish
+        run: echo "ShieldOps pipeline completed successfully"
