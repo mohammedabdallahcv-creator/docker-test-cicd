@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shieldops-k8s-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insecure-nginx
+  namespace: shieldops-k8s-test
+  labels:
+    app: insecure-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insecure-nginx
+  template:
+    metadata:
+      labels:
+        app: insecure-nginx
+    spec:
+      automountServiceAccountToken: true
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          securityContext:
+            privileged: true
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: false
+            runAsUser: 0
+          env:
+            - name: AWS_SECRET_ACCESS_KEY
+              value: "hardcoded-test-secret"
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: insecure-nginx-svc
+  namespace: shieldops-k8s-test
+spec:
+  type: LoadBalancer
+  selector:
+    app: insecure-nginx
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
