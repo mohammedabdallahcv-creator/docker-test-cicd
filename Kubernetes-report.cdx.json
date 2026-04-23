@@ -1,0 +1,116 @@
+{
+  "analysis_version": "2.0-ai",
+  "cis_benchmark": {
+    "percentage": 3.6,
+    "score": 1,
+    "sections": {
+      "4.1 Pod Security": {
+        "passed": 0,
+        "total": 2
+      },
+      "4.2 AppArmor": {
+        "passed": 0,
+        "total": 1
+      },
+      "4.3 Network": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.1 RBAC": {
+        "passed": 1,
+        "total": 6
+      },
+      "5.2 Pod Security": {
+        "passed": 0,
+        "total": 9
+      },
+      "5.3 Network": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.4 Secrets": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.7 General": {
+        "passed": 0,
+        "total": 4
+      }
+    },
+    "total": 28
+  },
+  "cis_score": 3,
+  "comparison": {},
+  "engine": "openrouter",
+  "fixed_yaml": "",
+  "image_cves": 0,
+  "image_vulnerabilities": {
+    "scan_timeout": false,
+    "status": "queued"
+  },
+  "issues": [
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "تأكد من تقديم Kubernetes manifest صالح (Deployment, Pod, Service, etc.) للتحليل. Kubernetes manifests عادة تحتوي على apiVersion, kind, metadata, spec.",
+      "issue": "الملف المقدم هو GitHub Actions workflow وليس Kubernetes manifest. لا يمكن تحليله كمواصفات Kubernetes.",
+      "message": "الملف المقدم هو GitHub Actions workflow وليس Kubernetes manifest. لا يمكن تحليله كمواصفات Kubernetes.",
+      "recommendation": "تأكد من تقديم Kubernetes manifest صالح (Deployment, Pod, Service, etc.) للتحليل. Kubernetes manifests عادة تحتوي على apiVersion, kind, metadata, spec.",
+      "resource": "Not a Kubernetes Manifest",
+      "severity": "Critical"
+    }
+  ],
+  "lang": "ar",
+  "rbac_analysis": {
+    "rbac_issues": [],
+    "rbac_percentage": 0,
+    "rbac_score": 0,
+    "rbac_summary": {
+      "bindings_checked": 0,
+      "critical": 0,
+      "high": 0,
+      "roles_checked": 0,
+      "service_accounts": 0
+    },
+    "rbac_total": 1
+  },
+  "rbac_score": 0,
+  "resources_scanned": 1,
+  "result_mode": "partial",
+  "results": [
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "تأكد من تقديم Kubernetes manifest صالح (Deployment, Pod, Service, etc.) للتحليل. Kubernetes manifests عادة تحتوي على apiVersion, kind, metadata, spec.",
+      "issue": "الملف المقدم هو GitHub Actions workflow وليس Kubernetes manifest. لا يمكن تحليله كمواصفات Kubernetes.",
+      "message": "الملف المقدم هو GitHub Actions workflow وليس Kubernetes manifest. لا يمكن تحليله كمواصفات Kubernetes.",
+      "recommendation": "تأكد من تقديم Kubernetes manifest صالح (Deployment, Pod, Service, etc.) للتحليل. Kubernetes manifests عادة تحتوي على apiVersion, kind, metadata, spec.",
+      "resource": "Not a Kubernetes Manifest",
+      "severity": "Critical"
+    }
+  ],
+  "scan_id": "76d31d8264aa44d69be0ae05e56573d3",
+  "score": 36,
+  "stats": {
+    "issues_found": 1,
+    "scanned": 1,
+    "score": 36,
+    "total_issues": 1
+  },
+  "summary": "هذا الملف هو workflow وليس Kubernetes manifest، تم العثور على 1 مشكلة",
+  "total_issues": 1,
+  "v2_scan": {
+    "analysis_version": "2.0",
+    "issues": [],
+    "lang": "ar",
+    "resources_scanned": 1,
+    "results": [],
+    "stats": {
+      "issues_found": 0,
+      "scanned": 1,
+      "score": "100%"
+    },
+    "summary": "✅ لا توجد مشاكل! ملفات K8s الخاصة بك ممتازة.",
+    "total_issues": 0
+  }
+}
