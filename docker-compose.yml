@@ -1,474 +1,110 @@
-{
-  "analysis_version": "2.0-ai",
-  "artifact_type": "compose",
-  "engine": "openrouter",
-  "fixed_yaml": null,
-  "fixes": [],
-  "issues": [
-    {
-      "category": "BestPractice",
-      "fix": "استبدل :latest برقم إصدار محدد مثل nginx:1.25-alpine",
-      "issue": "استخدام صورة nginx:latest يعد من الممارسات السيئة حيث يجب تحديد إصدار محدد لتجنب التغييرات غير المتوقعة",
-      "message": "استخدام صورة nginx:latest يعد من الممارسات السيئة حيث يجب تحديد إصدار محدد لتجنب التغييرات غير المتوقعة",
-      "recommendation": "استبدل :latest برقم إصدار محدد مثل nginx:1.25-alpine",
-      "service": "web",
-      "severity": "Medium"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن الخدمة تعمل بشكل صحيح مثل: healthcheck: {test: [\"CMD\", \"curl\", \"-f\", \"http://localhost\"], interval: 30s, timeout: 10s, retries: 3}",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة nginx",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة nginx",
-      "recommendation": "أضف فحص صحة للتأكد من أن الخدمة تعمل بشكل صحيح مثل: healthcheck: {test: [\"CMD\", \"curl\", \"-f\", \"http://localhost\"], interval: 30s, timeout: 10s, retries: 3}",
-      "service": "web",
-      "severity": "Low"
-    },
-    {
-      "category": "Security",
-      "fix": "استخدم متغيرات البيئة أو Docker secrets لتخزين الأسرار بشكل آمن",
-      "issue": "المفتاح السري SECRET_KEY مكتوب مباشرة في ملف compose مما يعرضه للقراءة",
-      "message": "المفتاح السري SECRET_KEY مكتوب مباشرة في ملف compose مما يعرضه للقراءة",
-      "recommendation": "استخدم متغيرات البيئة أو Docker secrets لتخزين الأسرار بشكل آمن",
-      "service": "api",
-      "severity": "High"
-    },
-    {
-      "category": "Security",
-      "fix": "عطل وضع التصحيح في بيئات الإنتاج وأضف متغيرات بيئة للتحكم في هذه الإعدادات",
-      "issue": "وضع التصحيح DEBUG مُفعّل في بيئة الإنتاج",
-      "message": "وضع التصحيح DEBUG مُفعّل في بيئة الإنتاج",
-      "recommendation": "عطل وضع التصحيح في بيئات الإنتاج وأضف متغيرات بيئة للتحكم في هذه الإعدادات",
-      "service": "api",
-      "severity": "Medium"
-    },
-    {
-      "category": "Security",
-      "fix": "أضف USER directive لتحديد مستخدم غير root: user: \"1000:1000\"",
-      "issue": "الحاوية تعمل كمستخدم root افتراضياً مما يزيد من سطح الهجوم",
-      "message": "الحاوية تعمل كمستخدم root افتراضياً مما يزيد من سطح الهجوم",
-      "recommendation": "أضف USER directive لتحديد مستخدم غير root: user: \"1000:1000\"",
-      "service": "api",
-      "severity": "High"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن خادم HTTP يعمل بشكل صحيح",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة API",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة API",
-      "recommendation": "أضف فحص صحة للتأكد من أن خادم HTTP يعمل بشكل صحيح",
-      "service": "api",
-      "severity": "Low"
-    },
-    {
-      "category": "Security",
-      "fix": "استخدم كلمة مرور قوية ومعقدة لا تقل عن 16 حرف وتخزينها بشكل آمن",
-      "issue": "كلمة مرور قاعدة البيانات ضعيفة جداً 'weakpassword123'",
-      "message": "كلمة مرور قاعدة البيانات ضعيفة جداً 'weakpassword123'",
-      "recommendation": "استخدم كلمة مرور قوية ومعقدة لا تقل عن 16 حرف وتخزينها بشكل آمن",
-      "service": "db",
-      "severity": "High"
-    },
-    {
-      "category": "Reliability",
-      "fix": "أضف فحص صحة للتأكد من أن قاعدة البيانات تعمل: healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U shieldops_user\"], interval: 30s, timeout: 5s, retries: 5}",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة قاعدة البيانات",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة قاعدة البيانات",
-      "recommendation": "أضف فحص صحة للتأكد من أن قاعدة البيانات تعمل: healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U shieldops_user\"], interval: 30s, timeout: 5s, retries: 5}",
-      "service": "db",
-      "severity": "High"
-    },
-    {
-      "category": "Security",
-      "fix": "أضف كلمة مرور Redis عبر متغير البيئة redis_password أو استخدم requirepass في التكوين",
-      "issue": "خدمة Redis بدون كلمة مرور مما يسمح بالوصول غير المصرح به",
-      "message": "خدمة Redis بدون كلمة مرور مما يسمح بالوصول غير المصرح به",
-      "recommendation": "أضف كلمة مرور Redis عبر متغير البيئة redis_password أو استخدم requirepass في التكوين",
-      "service": "redis",
-      "severity": "High"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن Redis يعمل: healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 30s, timeout: 5s, retries: 3}",
-      "issue": "لا يوجد فحص صحة healthcheck لخدمة Redis",
-      "message": "لا يوجد فحص صحة healthcheck لخدمة Redis",
-      "recommendation": "أضف فحص صحة للتأكد من أن Redis يعمل: healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 30s, timeout: 5s, retries: 3}",
-      "service": "redis",
-      "severity": "Low"
-    }
-  ],
-  "lang": "ar",
-  "results": [
-    {
-      "category": "BestPractice",
-      "fix": "استبدل :latest برقم إصدار محدد مثل nginx:1.25-alpine",
-      "issue": "استخدام صورة nginx:latest يعد من الممارسات السيئة حيث يجب تحديد إصدار محدد لتجنب التغييرات غير المتوقعة",
-      "message": "استخدام صورة nginx:latest يعد من الممارسات السيئة حيث يجب تحديد إصدار محدد لتجنب التغييرات غير المتوقعة",
-      "recommendation": "استبدل :latest برقم إصدار محدد مثل nginx:1.25-alpine",
-      "service": "web",
-      "severity": "Medium"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن الخدمة تعمل بشكل صحيح مثل: healthcheck: {test: [\"CMD\", \"curl\", \"-f\", \"http://localhost\"], interval: 30s, timeout: 10s, retries: 3}",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة nginx",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة nginx",
-      "recommendation": "أضف فحص صحة للتأكد من أن الخدمة تعمل بشكل صحيح مثل: healthcheck: {test: [\"CMD\", \"curl\", \"-f\", \"http://localhost\"], interval: 30s, timeout: 10s, retries: 3}",
-      "service": "web",
-      "severity": "Low"
-    },
-    {
-      "category": "Security",
-      "fix": "استخدم متغيرات البيئة أو Docker secrets لتخزين الأسرار بشكل آمن",
-      "issue": "المفتاح السري SECRET_KEY مكتوب مباشرة في ملف compose مما يعرضه للقراءة",
-      "message": "المفتاح السري SECRET_KEY مكتوب مباشرة في ملف compose مما يعرضه للقراءة",
-      "recommendation": "استخدم متغيرات البيئة أو Docker secrets لتخزين الأسرار بشكل آمن",
-      "service": "api",
-      "severity": "High"
-    },
-    {
-      "category": "Security",
-      "fix": "عطل وضع التصحيح في بيئات الإنتاج وأضف متغيرات بيئة للتحكم في هذه الإعدادات",
-      "issue": "وضع التصحيح DEBUG مُفعّل في بيئة الإنتاج",
-      "message": "وضع التصحيح DEBUG مُفعّل في بيئة الإنتاج",
-      "recommendation": "عطل وضع التصحيح في بيئات الإنتاج وأضف متغيرات بيئة للتحكم في هذه الإعدادات",
-      "service": "api",
-      "severity": "Medium"
-    },
-    {
-      "category": "Security",
-      "fix": "أضف USER directive لتحديد مستخدم غير root: user: \"1000:1000\"",
-      "issue": "الحاوية تعمل كمستخدم root افتراضياً مما يزيد من سطح الهجوم",
-      "message": "الحاوية تعمل كمستخدم root افتراضياً مما يزيد من سطح الهجوم",
-      "recommendation": "أضف USER directive لتحديد مستخدم غير root: user: \"1000:1000\"",
-      "service": "api",
-      "severity": "High"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن خادم HTTP يعمل بشكل صحيح",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة API",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة API",
-      "recommendation": "أضف فحص صحة للتأكد من أن خادم HTTP يعمل بشكل صحيح",
-      "service": "api",
-      "severity": "Low"
-    },
-    {
-      "category": "Security",
-      "fix": "استخدم كلمة مرور قوية ومعقدة لا تقل عن 16 حرف وتخزينها بشكل آمن",
-      "issue": "كلمة مرور قاعدة البيانات ضعيفة جداً 'weakpassword123'",
-      "message": "كلمة مرور قاعدة البيانات ضعيفة جداً 'weakpassword123'",
-      "recommendation": "استخدم كلمة مرور قوية ومعقدة لا تقل عن 16 حرف وتخزينها بشكل آمن",
-      "service": "db",
-      "severity": "High"
-    },
-    {
-      "category": "Reliability",
-      "fix": "أضف فحص صحة للتأكد من أن قاعدة البيانات تعمل: healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U shieldops_user\"], interval: 30s, timeout: 5s, retries: 5}",
-      "issue": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة قاعدة البيانات",
-      "message": "لا يوجد فحص صحة healthcheck مُعرّف لخدمة قاعدة البيانات",
-      "recommendation": "أضف فحص صحة للتأكد من أن قاعدة البيانات تعمل: healthcheck: {test: [\"CMD-SHELL\", \"pg_isready -U shieldops_user\"], interval: 30s, timeout: 5s, retries: 5}",
-      "service": "db",
-      "severity": "High"
-    },
-    {
-      "category": "Security",
-      "fix": "أضف كلمة مرور Redis عبر متغير البيئة redis_password أو استخدم requirepass في التكوين",
-      "issue": "خدمة Redis بدون كلمة مرور مما يسمح بالوصول غير المصرح به",
-      "message": "خدمة Redis بدون كلمة مرور مما يسمح بالوصول غير المصرح به",
-      "recommendation": "أضف كلمة مرور Redis عبر متغير البيئة redis_password أو استخدم requirepass في التكوين",
-      "service": "redis",
-      "severity": "High"
-    },
-    {
-      "category": "BestPractice",
-      "fix": "أضف فحص صحة للتأكد من أن Redis يعمل: healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 30s, timeout: 5s, retries: 3}",
-      "issue": "لا يوجد فحص صحة healthcheck لخدمة Redis",
-      "message": "لا يوجد فحص صحة healthcheck لخدمة Redis",
-      "recommendation": "أضف فحص صحة للتأكد من أن Redis يعمل: healthcheck: {test: [\"CMD\", \"redis-cli\", \"ping\"], interval: 30s, timeout: 5s, retries: 3}",
-      "service": "redis",
-      "severity": "Low"
-    }
-  ],
-  "services_scanned": 4,
-  "stats": {
-    "issues_found": 10,
-    "scanned": 4,
-    "score": "45%"
-  },
-  "summary": "تم اكتشاف عدة مشكلات أمنية وت可靠性 تتعلق بالمفاتيح الثابتة وضوابط الموارد وفحوصات الصحة",
-  "total_issues": 10,
-  "v2_scan": {
-    "analysis_version": "2.0",
-    "fixed_yaml": "version: '3.9'\nservices:\n  web:\n    image: nginx:latest\n    container_name: sample_web\n    ports:\n    - 8080:80\n    environment:\n      NGINX_HOST: localhost\n      NGINX_PORT: 80\n    volumes:\n    - ./nginx.conf:/etc/nginx/nginx.conf:ro\n    depends_on:\n    - api\n    - db\n    restart: unless-stopped\n    user: 1000:1000\n    deploy:\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 512M\n    healthcheck:\n      test:\n      - CMD-SHELL\n      - exit 0\n      interval: 30s\n      timeout: 10s\n      retries: 3\n  api:\n    image: python:3.11-slim\n    container_name: sample_api\n    working_dir: /app\n    command: sh -c \"python -m http.server 5000\"\n    ports:\n    - 5000:5000\n    environment:\n      APP_ENV: development\n      DEBUG: 'true'\n      SECRET_KEY: ${SECRET_KEY}\n    volumes:\n    - ./app:/app\n    restart: on-failure\n    user: 1000:1000\n    env_file:\n    - .env\n    deploy:\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 512M\n    healthcheck:\n      test:\n      - CMD\n      - python\n      - -c\n      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\n      interval: 30s\n      timeout: 10s\n      retries: 3\n    depends_on:\n      db:\n        condition: service_healthy\n  db:\n    image: postgres:15\n    container_name: sample_db\n    environment:\n      POSTGRES_DB: shieldops\n      POSTGRES_USER: shieldops_user\n      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}\n    ports:\n    - 5432:5432\n    volumes:\n    - db_data:/var/lib/postgresql/data\n    restart: always\n    env_file:\n    - .env\n    deploy:\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 512M\n    healthcheck:\n      test:\n      - CMD-SHELL\n      - pg_isready -U ${POSTGRES_USER:-postgres}\n      interval: 10s\n      timeout: 5s\n      retries: 5\n  redis:\n    image: redis:7\n    container_name: sample_redis\n    ports:\n    - 6379:6379\n    restart: unless-stopped\n    deploy:\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 512M\n    healthcheck:\n      test:\n      - CMD\n      - redis-cli\n      - ping\n      interval: 10s\n      timeout: 5s\n      retries: 5\nvolumes:\n  db_data: null\n",
-    "fixes": [],
-    "issues": [
-      {
-        "category": "Security",
-        "issue": "الخدمة تعمل بصلاحيات المستخدم الجذر (root)",
-        "recommendation": "حدد مستخدماً غير root عبر حقل 'user:' لتعزيز الأمان.",
-        "service": "web",
-        "severity": "medium"
-      },
-      {
-        "category": "Security",
-        "issue": "لا عزل للشبكة: جميع الخدمات تشارك نفس الشبكة الافتراضية",
-        "recommendation": "حدد شبكات منفصلة (مثل frontend/backend) وخصص كل خدمة للشبكة المناسبة.",
-        "service": "web",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "recommendation": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "service": "web",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "recommendation": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "service": "web",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "وسم الصورة هو :latest أو غائب — يجعل النشر غير متوقع",
-        "recommendation": "ثبّت إصداراً محدداً (مثل nginx:1.25.3) لضمان نشر قابل للتكرار.",
-        "service": "web",
-        "severity": "high"
-      },
-      {
-        "category": "Security",
-        "issue": "الخدمة تعمل بصلاحيات المستخدم الجذر (root)",
-        "recommendation": "حدد مستخدماً غير root عبر حقل 'user:' لتعزيز الأمان.",
-        "service": "api",
-        "severity": "medium"
-      },
-      {
-        "category": "Security",
-        "issue": "بيانات حساسة مكتوبة بنص صريح",
-        "recommendation": "استخدم Docker Secrets أو ملف .env بدلاً من القيم المكتوبة مباشرة.",
-        "service": "api",
-        "severity": "critical"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "recommendation": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "service": "api",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "recommendation": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "service": "api",
-        "severity": "medium"
-      },
-      {
-        "category": "Security",
-        "issue": "بيانات حساسة مكتوبة بنص صريح",
-        "recommendation": "استخدم Docker Secrets أو ملف .env بدلاً من القيم المكتوبة مباشرة.",
-        "service": "db",
-        "severity": "critical"
-      },
-      {
-        "category": "Security",
-        "issue": "منفذ قاعدة البيانات مكشوف للمضيف: خطر أمني بالغ",
-        "recommendation": "أزل تعيينات المنافذ من خدمات قاعدة البيانات؛ استخدم الشبكة الداخلية لـ Docker فقط.",
-        "service": "db",
-        "severity": "high"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "recommendation": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "service": "db",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "recommendation": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "service": "db",
-        "severity": "medium"
-      },
-      {
-        "category": "Security",
-        "issue": "منفذ قاعدة البيانات مكشوف للمضيف: خطر أمني بالغ",
-        "recommendation": "أزل تعيينات المنافذ من خدمات قاعدة البيانات؛ استخدم الشبكة الداخلية لـ Docker فقط.",
-        "service": "redis",
-        "severity": "high"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "recommendation": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "service": "redis",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "recommendation": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "service": "redis",
-        "severity": "medium"
-      },
-      {
-        "category": "Reliability",
-        "issue": "قاعدة البيانات بدون حجم دائم: ستُفقد جميع البيانات عند إعادة التشغيل",
-        "recommendation": "أضف حجماً مسمى (مثل db_data:/var/lib/postgresql/data) لحفظ البيانات بشكل دائم.",
-        "service": "redis",
-        "severity": "critical"
-      }
-    ],
-    "lang": "ar",
-    "results": [
-      {
-        "category": "Security",
-        "fix": "حدد مستخدماً غير root عبر حقل 'user:' لتعزيز الأمان.",
-        "message": "الخدمة تعمل بصلاحيات المستخدم الجذر (root)",
-        "rule_id": "root-user",
-        "service": "web",
-        "severity": "Medium"
-      },
-      {
-        "category": "Security",
-        "fix": "حدد شبكات منفصلة (مثل frontend/backend) وخصص كل خدمة للشبكة المناسبة.",
-        "message": "لا عزل للشبكة: جميع الخدمات تشارك نفس الشبكة الافتراضية",
-        "rule_id": "no-network-isolation",
-        "service": "web",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "message": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "rule_id": "no-healthcheck",
-        "service": "web",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "message": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "rule_id": "no-resource-limits",
-        "service": "web",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "ثبّت إصداراً محدداً (مثل nginx:1.25.3) لضمان نشر قابل للتكرار.",
-        "message": "وسم الصورة هو :latest أو غائب — يجعل النشر غير متوقع",
-        "rule_id": "latest-tag",
-        "service": "web",
-        "severity": "High"
-      },
-      {
-        "category": "Security",
-        "fix": "حدد مستخدماً غير root عبر حقل 'user:' لتعزيز الأمان.",
-        "message": "الخدمة تعمل بصلاحيات المستخدم الجذر (root)",
-        "rule_id": "root-user",
-        "service": "api",
-        "severity": "Medium"
-      },
-      {
-        "category": "Security",
-        "fix": "استخدم Docker Secrets أو ملف .env بدلاً من القيم المكتوبة مباشرة.",
-        "message": "بيانات حساسة مكتوبة بنص صريح",
-        "rule_id": "hardcoded-secrets",
-        "service": "api",
-        "severity": "Critical"
-      },
-      {
-        "category": "Reliability",
-        "fix": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "message": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "rule_id": "no-healthcheck",
-        "service": "api",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "message": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "rule_id": "no-resource-limits",
-        "service": "api",
-        "severity": "Medium"
-      },
-      {
-        "category": "Security",
-        "fix": "استخدم Docker Secrets أو ملف .env بدلاً من القيم المكتوبة مباشرة.",
-        "message": "بيانات حساسة مكتوبة بنص صريح",
-        "rule_id": "hardcoded-secrets",
-        "service": "db",
-        "severity": "Critical"
-      },
-      {
-        "category": "Security",
-        "fix": "أزل تعيينات المنافذ من خدمات قاعدة البيانات؛ استخدم الشبكة الداخلية لـ Docker فقط.",
-        "message": "منفذ قاعدة البيانات مكشوف للمضيف: خطر أمني بالغ",
-        "rule_id": "exposed-db-ports",
-        "service": "db",
-        "severity": "High"
-      },
-      {
-        "category": "Reliability",
-        "fix": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "message": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "rule_id": "no-healthcheck",
-        "service": "db",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "message": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "rule_id": "no-resource-limits",
-        "service": "db",
-        "severity": "Medium"
-      },
-      {
-        "category": "Security",
-        "fix": "أزل تعيينات المنافذ من خدمات قاعدة البيانات؛ استخدم الشبكة الداخلية لـ Docker فقط.",
-        "message": "منفذ قاعدة البيانات مكشوف للمضيف: خطر أمني بالغ",
-        "rule_id": "exposed-db-ports",
-        "service": "redis",
-        "severity": "High"
-      },
-      {
-        "category": "Reliability",
-        "fix": "أضف كتلة healthcheck لمراقبة توفر الخدمة.",
-        "message": "لا يوجد فحص صحي: حالة الخدمة غير معروفة",
-        "rule_id": "no-healthcheck",
-        "service": "redis",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "حدد deploy.resources.limits بقيم المعالج والذاكرة المناسبة.",
-        "message": "لا حدود للموارد: خطر إيقاف الحاوية بسبب نفاد الذاكرة",
-        "rule_id": "no-resource-limits",
-        "service": "redis",
-        "severity": "Medium"
-      },
-      {
-        "category": "Reliability",
-        "fix": "أضف حجماً مسمى (مثل db_data:/var/lib/postgresql/data) لحفظ البيانات بشكل دائم.",
-        "message": "قاعدة البيانات بدون حجم دائم: ستُفقد جميع البيانات عند إعادة التشغيل",
-        "rule_id": "no-db-volumes",
-        "service": "redis",
-        "severity": "Critical"
-      }
-    ],
-    "scan_mode": "smart",
-    "services_scanned": 4,
-    "stats": {
-      "issues_found": 17,
-      "scanned": 4,
-      "score": "0%"
-    },
-    "summary": "[SMART MODE] تم اكتشاف 17 مشكلة: 🛑 3 Critical, 🔴 3 High, 🟡 11 Medium",
-    "total_issues": 17
-  }
-}
+version: '3.9'
+services:
+  web:
+    image: nginx:latest
+    container_name: sample_web
+    ports:
+    - 8080:80
+    environment:
+      NGINX_HOST: localhost
+      NGINX_PORT: 80
+    volumes:
+    - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+    - api
+    - db
+    restart: unless-stopped
+    user: 1000:1000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - exit 0
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  api:
+    image: python:3.11-slim
+    container_name: sample_api
+    working_dir: /app
+    command: sh -c "python -m http.server 5000"
+    ports:
+    - 5000:5000
+    environment:
+      APP_ENV: development
+      DEBUG: 'true'
+      SECRET_KEY: ${SECRET_KEY}
+    volumes:
+    - ./app:/app
+    restart: on-failure
+    user: 1000:1000
+    env_file:
+    - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test:
+      - CMD
+      - python
+      - -c
+      - import urllib.request; urllib.request.urlopen('http://localhost:8000/health')
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:15
+    container_name: sample_db
+    environment:
+      POSTGRES_DB: shieldops
+      POSTGRES_USER: shieldops_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+    - 5432:5432
+    volumes:
+    - db_data:/var/lib/postgresql/data
+    restart: always
+    env_file:
+    - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U ${POSTGRES_USER:-postgres}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7
+    container_name: sample_redis
+    ports:
+    - 6379:6379
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db_data: null
