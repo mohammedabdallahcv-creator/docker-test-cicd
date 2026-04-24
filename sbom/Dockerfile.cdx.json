@@ -1,0 +1,169 @@
+{
+  "ai_warning": {
+    "engine": "heuristic",
+    "immediate_actions": [
+      "استمر في تثبيت الإصدارات ومتابعة تحديثات الأمان دورياً."
+    ],
+    "risk_level": "LOW",
+    "summary": "لم يتم العثور على ثغرات معروفة في الإصدارات المفحوصة.",
+    "warnings": []
+  },
+  "compliance_urls": {
+    "hipaa": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/compliance?framework=hipaa&source=sbom",
+    "iso27001": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/compliance?standard=iso27001&source=sbom",
+    "nist": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/compliance?framework=nist&source=sbom",
+    "pci": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/compliance?framework=pci&source=sbom",
+    "soc2": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/compliance?standard=soc2&source=sbom"
+  },
+  "component_count": 2,
+  "components": [
+    {
+      "disallowed": false,
+      "disallowed_reason": "",
+      "evidence": {
+        "instruction": "FROM",
+        "line": 31,
+        "source": "Dockerfile",
+        "stage": "builder",
+        "statement": "FROM ${NODE_IMAGE}:${NODE_VERSION}-bullseye AS builder"
+      },
+      "license": "UNKNOWN",
+      "license_status": "UNKNOWN",
+      "name": "${NODE_IMAGE}",
+      "purl": "pkg:docker/${NODE_IMAGE}@${NODE_VERSION}-bullseye",
+      "risk": "critical",
+      "risk_badge": "CRITICAL",
+      "type": "container-image",
+      "version": "${NODE_VERSION}-bullseye"
+    },
+    {
+      "disallowed": false,
+      "disallowed_reason": "",
+      "evidence": {
+        "instruction": "FROM",
+        "line": 60,
+        "source": "Dockerfile",
+        "stage": "final",
+        "statement": "FROM ${NODE_IMAGE}:${NODE_VERSION}-slim AS final"
+      },
+      "license": "UNKNOWN",
+      "license_status": "UNKNOWN",
+      "name": "${NODE_IMAGE}",
+      "purl": "pkg:docker/${NODE_IMAGE}@${NODE_VERSION}-slim",
+      "risk": "critical",
+      "risk_badge": "CRITICAL",
+      "type": "container-image",
+      "version": "${NODE_VERSION}-slim"
+    }
+  ],
+  "dashboard_url": "/sbom/dashboard",
+  "engine": "sbom-lite",
+  "license_scan": {
+    "findings": [
+      {
+        "license": "UNKNOWN",
+        "name": "${NODE_IMAGE}",
+        "reason": "License unknown; manual validation recommended.",
+        "status": "UNKNOWN",
+        "version": "${NODE_VERSION}-bullseye"
+      },
+      {
+        "license": "UNKNOWN",
+        "name": "${NODE_IMAGE}",
+        "reason": "License unknown; manual validation recommended.",
+        "status": "UNKNOWN",
+        "version": "${NODE_VERSION}-slim"
+      }
+    ],
+    "overall": "review",
+    "policy": {
+      "allowed": [
+        "APACHE-2.0",
+        "BSD-2-CLAUSE",
+        "BSD-3-CLAUSE",
+        "CURL",
+        "HPND",
+        "ISC",
+        "MIT",
+        "OPENSSL",
+        "POSTGRESQL",
+        "PSF-2.0",
+        "PYTHON-2.0",
+        "VIM"
+      ],
+      "restricted": [
+        "AGPL-3.0-ONLY",
+        "GPL-2.0",
+        "GPL-2.0-ONLY",
+        "GPL-3.0",
+        "GPL-3.0-ONLY",
+        "SSPL-1.0"
+      ],
+      "review": [
+        "CDDL-1.0",
+        "EPL-2.0",
+        "LGPL-2.1",
+        "LGPL-2.1-ONLY",
+        "LGPL-3.0",
+        "LGPL-3.0-ONLY",
+        "MPL-2.0"
+      ]
+    },
+    "summary": {
+      "allowed": 0,
+      "restricted": 0,
+      "review": 0,
+      "total": 2,
+      "unknown": 2
+    }
+  },
+  "metadata": {
+    "source_file": "dockerfile",
+    "timestamp": "2026-04-24T09:25:39.765303+00:00Z",
+    "tool": "ShieldOps AI SBOM Service"
+  },
+  "pdf_url": "/sbom/58800206-42a6-460f-af92-adc4c3c25de5/pdf",
+  "quick_actions": [
+    {
+      "description": "Resolve unknown or review-required licenses before shipping.",
+      "label": "Review license metadata",
+      "severity": "MEDIUM",
+      "target": "licenses",
+      "type": "review_unknown_licenses"
+    }
+  ],
+  "report_url": "/scan/58800206-42a6-460f-af92-adc4c3c25de5/sbom",
+  "risk_signal": "critical",
+  "sbom_format": "cyclonedx-lite",
+  "sbom_quality": {
+    "confidence": 100,
+    "coverage": 100,
+    "evidence_coverage": 100,
+    "label": "Deep SBOM",
+    "warnings": []
+  },
+  "scan_id": "58800206-42a6-460f-af92-adc4c3c25de5",
+  "serial_number": "urn:uuid:20260424092539765276",
+  "spec_version": "1.5-lite",
+  "success": true,
+  "summary": {
+    "confidence": 100,
+    "disallowed_count": 0,
+    "engine": "sbom-lite",
+    "format": "cyclonedx-lite",
+    "license_review_count": 2,
+    "quality_label": "Deep SBOM",
+    "risk_signal": "critical",
+    "source_file": "dockerfile",
+    "total_components": 2,
+    "vulnerability_count": 0,
+    "vulnerable_component_count": 0
+  },
+  "top_vulnerabilities": [],
+  "vulnerability_scan": {
+    "grouped": [],
+    "scanned_packages": 0,
+    "vulnerabilities": [],
+    "vulnerability_count": 0
+  }
+}
