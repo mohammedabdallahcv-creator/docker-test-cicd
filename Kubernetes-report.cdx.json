@@ -1,0 +1,592 @@
+{
+  "analysis_version": "2.0-ai",
+  "cis_benchmark": {
+    "percentage": 21.4,
+    "score": 6,
+    "sections": {
+      "4.1 Pod Security": {
+        "passed": 1,
+        "total": 2
+      },
+      "4.2 AppArmor": {
+        "passed": 0,
+        "total": 1
+      },
+      "4.3 Network": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.1 RBAC": {
+        "passed": 1,
+        "total": 6
+      },
+      "5.2 Pod Security": {
+        "passed": 4,
+        "total": 9
+      },
+      "5.3 Network": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.4 Secrets": {
+        "passed": 0,
+        "total": 2
+      },
+      "5.7 General": {
+        "passed": 0,
+        "total": 4
+      }
+    },
+    "total": 28
+  },
+  "cis_score": 21,
+  "comparison": {},
+  "engine": "openrouter",
+  "fixed_yaml": "",
+  "image_cves": 2,
+  "image_vulnerabilities": {
+    "scan_timeout": false,
+    "status": "queued"
+  },
+  "issues": [
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.privileged: false في مواصفات الحاوية.",
+      "issue": "الحاوية تعمل بوضع متميز (privileged: true) مما يمنحها صلاحيات كاملة على نظام التشغيل المضيف.",
+      "message": "الحاوية تعمل بوضع متميز (privileged: true) مما يمنحها صلاحيات كاملة على نظام التشغيل المضيف.",
+      "recommendation": "تعيين securityContext.privileged: false في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.allowPrivilegeEscalation: false في مواصفات الحاوية.",
+      "issue": "تمكين التصعيد الامتيازات (allowPrivilegeEscalation: true) يسمح للحاوية بالحصول على صلاحيات إضافية.",
+      "message": "تمكين التصعيد الامتيازات (allowPrivilegeEscalation: true) يسمح للحاوية بالحصول على صلاحيات إضافية.",
+      "recommendation": "تعيين securityContext.allowPrivilegeEscalation: false في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "استخدام Kubernetes Secret لتخزين الأسرار ومرجعتها عبر envFrom أو env. مثال: استبدال value بـ valueFrom مع secretKeyRef.",
+      "issue": "هناك متغير بيئة AWS_SECRET_ACCESS_KEY مع قيمة مفتوحة-hardcoded مما يكشف الأسرار في تعريف YAML.",
+      "message": "هناك متغير بيئة AWS_SECRET_ACCESS_KEY مع قيمة مفتوحة-hardcoded مما يكشف الأسرار في تعريف YAML.",
+      "recommendation": "استخدام Kubernetes Secret لتخزين الأسرار ومرجعتها عبر envFrom أو env. مثال: استبدال value بـ valueFrom مع secretKeyRef.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "إزالة حجم hostPath أو تقييده بمسارات محددة. استخدام emptyDir للحاجات المؤقتة أو PersistentVolumeClaim للبيانات الدائمة.",
+      "issue": "حجم hostPath يmount مجلد الجذر / من المضيف مما يتيح للحاوية الوصول الكامل لنظام ملفات المضيف.",
+      "message": "حجم hostPath يmount مجلد الجذر / من المضيف مما يتيح للحاوية الوصول الكامل لنظام ملفات المضيف.",
+      "recommendation": "إزالة حجم hostPath أو تقييده بمسارات محددة. استخدام emptyDir للحاجات المؤقتة أو PersistentVolumeClaim للبيانات الدائمة.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.runAsUser: 1000 أو أي UID غير جذري، والمجموعة securityContext.runAsNonRoot: true.",
+      "issue": "تشغيل الحاوية كمستخدم الجذر (runAsUser: 0) يعد انتهاكاً أمنياً خطيراً.",
+      "message": "تشغيل الحاوية كمستخدم الجذر (runAsUser: 0) يعد انتهاكاً أمنياً خطيراً.",
+      "recommendation": "تعيين securityContext.runAsUser: 1000 أو أي UID غير جذري، والمجموعة securityContext.runAsNonRoot: true.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.readOnlyRootFilesystem: true في مواصفات الحاوية.",
+      "issue": "نظام الملفات الجذر للحاوية قابل للكتابة (readOnlyRootFilesystem: false) يزيد من سطح الهجوم.",
+      "message": "نظام الملفات الجذر للحاوية قابل للكتابة (readOnlyRootFilesystem: false) يزيد من سطح الهجوم.",
+      "recommendation": "تعيين securityContext.readOnlyRootFilesystem: true في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "BestPractice",
+      "container": "nginx",
+      "fix": "تحديد إصدار محدد مثل image: nginx:1.27.0 أو استخدام SHA256 للتجزئة لضمان ثبات الصورة.",
+      "issue": "الصورة nginx:latest تستخدم علامة غير محددة مما يؤدي لتحديثات غير متوقعة.",
+      "message": "الصورة nginx:latest تستخدم علامة غير محددة مما يؤدي لتحديثات غير متوقعة.",
+      "recommendation": "تحديد إصدار محدد مثل image: nginx:1.27.0 أو استخدام SHA256 للتجزئة لضمان ثبات الصورة.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "تعيين automountServiceAccountToken: false في مواصفات Pod ما لم تكن الحاوية تحتاج صراحةً لرمز الحساب.",
+      "issue": "تمكين mount حساب الخدمة (automountServiceAccountToken: true) يعرض رمز الحساب بشكل غير ضروري.",
+      "message": "تمكين mount حساب الخدمة (automountServiceAccountToken: true) يعرض رمز الحساب بشكل غير ضروري.",
+      "recommendation": "تعيين automountServiceAccountToken: false في مواصفات Pod ما لم تكن الحاوية تحتاج صراحةً لرمز الحساب.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة resources.limits وresources.requests للحاوية:\nresources:\n  limits:\n    cpu: \"500m\"\n    memory: \"256Mi\"\n  requests:\n    cpu: \"100m\"\n    memory: \"128Mi\"",
+      "issue": "لا توجد حدود أو طلبات للموارد مما قد يؤثر على استقرار المجموعة.",
+      "message": "لا توجد حدود أو طلبات للموارد مما قد يؤثر على استقرار المجموعة.",
+      "recommendation": "إضافة resources.limits وresources.requests للحاوية:\nresources:\n  limits:\n    cpu: \"500m\"\n    memory: \"256Mi\"\n  requests:\n    cpu: \"100m\"\n    memory: \"128Mi\"",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة readinessProbe:\nreadinessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 5\n  periodSeconds: 10",
+      "issue": "لا يوجد فحص جاهزية (readinessProbe) مما قد يؤدي لتوجيه حركة المرور لحاويات غير جاهزة.",
+      "message": "لا يوجد فحص جاهزية (readinessProbe) مما قد يؤدي لتوجيه حركة المرور لحاويات غير جاهزة.",
+      "recommendation": "إضافة readinessProbe:\nreadinessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 5\n  periodSeconds: 10",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة livenessProbe:\nlivenessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 10\n  periodSeconds: 20",
+      "issue": "لا يوجد فحص حياة (livenessProbe) لتحديد何时 إعادة تشغيل الحاوية.",
+      "message": "لا يوجد فحص حياة (livenessProbe) لتحديد何时 إعادة تشغيل الحاوية.",
+      "recommendation": "إضافة livenessProbe:\nlivenessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 10\n  periodSeconds: 20",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "استخدام ClusterIP للخدمات الداخلية أو Ingress مع NetworkPolicy لتقييد الوصول. إذا كان LoadBalancer ضرورياً، تأكد من تقييد الوصول عبرannotations أو سياسات الشبكة.",
+      "issue": "الخدمة من النوع LoadBalancer تعرّض التطبيق للإنترنت العام.",
+      "message": "الخدمة من النوع LoadBalancer تعرّض التطبيق للإنترنت العام.",
+      "recommendation": "استخدام ClusterIP للخدمات الداخلية أو Ingress مع NetworkPolicy لتقييد الوصول. إذا كان LoadBalancer ضرورياً، تأكد من تقييد الوصول عبرannotations أو سياسات الشبكة.",
+      "resource": "Service/insecure-nginx-svc",
+      "severity": "Medium"
+    },
+    {
+      "category": "BestPractice",
+      "container": "",
+      "fix": "إضافة NetworkPolicy في مساحة الأسماء:\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny\n  namespace: shieldops-k8s-test\nspec:\n  podSelector: {}",
+      "issue": "لا يوجد NetworkPolicy لتقييد حركة المرور بين المساحات الأسماء.",
+      "message": "لا يوجد NetworkPolicy لتقييد حركة المرور بين المساحات الأسماء.",
+      "recommendation": "إضافة NetworkPolicy في مساحة الأسماء:\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny\n  namespace: shieldops-k8s-test\nspec:\n  podSelector: {}",
+      "resource": "Namespace/shieldops-k8s-test",
+      "severity": "Medium"
+    }
+  ],
+  "lang": "ar",
+  "rbac_analysis": {
+    "rbac_issues": [],
+    "rbac_percentage": 0,
+    "rbac_score": 0,
+    "rbac_summary": {
+      "bindings_checked": 0,
+      "critical": 0,
+      "high": 0,
+      "roles_checked": 0,
+      "service_accounts": 0
+    },
+    "rbac_total": 1
+  },
+  "rbac_score": 0,
+  "resources_scanned": 3,
+  "result_mode": "partial",
+  "results": [
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.privileged: false في مواصفات الحاوية.",
+      "issue": "الحاوية تعمل بوضع متميز (privileged: true) مما يمنحها صلاحيات كاملة على نظام التشغيل المضيف.",
+      "message": "الحاوية تعمل بوضع متميز (privileged: true) مما يمنحها صلاحيات كاملة على نظام التشغيل المضيف.",
+      "recommendation": "تعيين securityContext.privileged: false في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.allowPrivilegeEscalation: false في مواصفات الحاوية.",
+      "issue": "تمكين التصعيد الامتيازات (allowPrivilegeEscalation: true) يسمح للحاوية بالحصول على صلاحيات إضافية.",
+      "message": "تمكين التصعيد الامتيازات (allowPrivilegeEscalation: true) يسمح للحاوية بالحصول على صلاحيات إضافية.",
+      "recommendation": "تعيين securityContext.allowPrivilegeEscalation: false في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "استخدام Kubernetes Secret لتخزين الأسرار ومرجعتها عبر envFrom أو env. مثال: استبدال value بـ valueFrom مع secretKeyRef.",
+      "issue": "هناك متغير بيئة AWS_SECRET_ACCESS_KEY مع قيمة مفتوحة-hardcoded مما يكشف الأسرار في تعريف YAML.",
+      "message": "هناك متغير بيئة AWS_SECRET_ACCESS_KEY مع قيمة مفتوحة-hardcoded مما يكشف الأسرار في تعريف YAML.",
+      "recommendation": "استخدام Kubernetes Secret لتخزين الأسرار ومرجعتها عبر envFrom أو env. مثال: استبدال value بـ valueFrom مع secretKeyRef.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "إزالة حجم hostPath أو تقييده بمسارات محددة. استخدام emptyDir للحاجات المؤقتة أو PersistentVolumeClaim للبيانات الدائمة.",
+      "issue": "حجم hostPath يmount مجلد الجذر / من المضيف مما يتيح للحاوية الوصول الكامل لنظام ملفات المضيف.",
+      "message": "حجم hostPath يmount مجلد الجذر / من المضيف مما يتيح للحاوية الوصول الكامل لنظام ملفات المضيف.",
+      "recommendation": "إزالة حجم hostPath أو تقييده بمسارات محددة. استخدام emptyDir للحاجات المؤقتة أو PersistentVolumeClaim للبيانات الدائمة.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Critical"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.runAsUser: 1000 أو أي UID غير جذري، والمجموعة securityContext.runAsNonRoot: true.",
+      "issue": "تشغيل الحاوية كمستخدم الجذر (runAsUser: 0) يعد انتهاكاً أمنياً خطيراً.",
+      "message": "تشغيل الحاوية كمستخدم الجذر (runAsUser: 0) يعد انتهاكاً أمنياً خطيراً.",
+      "recommendation": "تعيين securityContext.runAsUser: 1000 أو أي UID غير جذري، والمجموعة securityContext.runAsNonRoot: true.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Security",
+      "container": "nginx",
+      "fix": "تعيين securityContext.readOnlyRootFilesystem: true في مواصفات الحاوية.",
+      "issue": "نظام الملفات الجذر للحاوية قابل للكتابة (readOnlyRootFilesystem: false) يزيد من سطح الهجوم.",
+      "message": "نظام الملفات الجذر للحاوية قابل للكتابة (readOnlyRootFilesystem: false) يزيد من سطح الهجوم.",
+      "recommendation": "تعيين securityContext.readOnlyRootFilesystem: true في مواصفات الحاوية.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "BestPractice",
+      "container": "nginx",
+      "fix": "تحديد إصدار محدد مثل image: nginx:1.27.0 أو استخدام SHA256 للتجزئة لضمان ثبات الصورة.",
+      "issue": "الصورة nginx:latest تستخدم علامة غير محددة مما يؤدي لتحديثات غير متوقعة.",
+      "message": "الصورة nginx:latest تستخدم علامة غير محددة مما يؤدي لتحديثات غير متوقعة.",
+      "recommendation": "تحديد إصدار محدد مثل image: nginx:1.27.0 أو استخدام SHA256 للتجزئة لضمان ثبات الصورة.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "تعيين automountServiceAccountToken: false في مواصفات Pod ما لم تكن الحاوية تحتاج صراحةً لرمز الحساب.",
+      "issue": "تمكين mount حساب الخدمة (automountServiceAccountToken: true) يعرض رمز الحساب بشكل غير ضروري.",
+      "message": "تمكين mount حساب الخدمة (automountServiceAccountToken: true) يعرض رمز الحساب بشكل غير ضروري.",
+      "recommendation": "تعيين automountServiceAccountToken: false في مواصفات Pod ما لم تكن الحاوية تحتاج صراحةً لرمز الحساب.",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "High"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة resources.limits وresources.requests للحاوية:\nresources:\n  limits:\n    cpu: \"500m\"\n    memory: \"256Mi\"\n  requests:\n    cpu: \"100m\"\n    memory: \"128Mi\"",
+      "issue": "لا توجد حدود أو طلبات للموارد مما قد يؤثر على استقرار المجموعة.",
+      "message": "لا توجد حدود أو طلبات للموارد مما قد يؤثر على استقرار المجموعة.",
+      "recommendation": "إضافة resources.limits وresources.requests للحاوية:\nresources:\n  limits:\n    cpu: \"500m\"\n    memory: \"256Mi\"\n  requests:\n    cpu: \"100m\"\n    memory: \"128Mi\"",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة readinessProbe:\nreadinessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 5\n  periodSeconds: 10",
+      "issue": "لا يوجد فحص جاهزية (readinessProbe) مما قد يؤدي لتوجيه حركة المرور لحاويات غير جاهزة.",
+      "message": "لا يوجد فحص جاهزية (readinessProbe) مما قد يؤدي لتوجيه حركة المرور لحاويات غير جاهزة.",
+      "recommendation": "إضافة readinessProbe:\nreadinessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 5\n  periodSeconds: 10",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Reliability",
+      "container": "nginx",
+      "fix": "إضافة livenessProbe:\nlivenessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 10\n  periodSeconds: 20",
+      "issue": "لا يوجد فحص حياة (livenessProbe) لتحديد何时 إعادة تشغيل الحاوية.",
+      "message": "لا يوجد فحص حياة (livenessProbe) لتحديد何时 إعادة تشغيل الحاوية.",
+      "recommendation": "إضافة livenessProbe:\nlivenessProbe:\n  httpGet:\n    path: /\n    port: 80\n  initialDelaySeconds: 10\n  periodSeconds: 20",
+      "resource": "Deployment/insecure-nginx",
+      "severity": "Medium"
+    },
+    {
+      "category": "Security",
+      "container": "",
+      "fix": "استخدام ClusterIP للخدمات الداخلية أو Ingress مع NetworkPolicy لتقييد الوصول. إذا كان LoadBalancer ضرورياً، تأكد من تقييد الوصول عبرannotations أو سياسات الشبكة.",
+      "issue": "الخدمة من النوع LoadBalancer تعرّض التطبيق للإنترنت العام.",
+      "message": "الخدمة من النوع LoadBalancer تعرّض التطبيق للإنترنت العام.",
+      "recommendation": "استخدام ClusterIP للخدمات الداخلية أو Ingress مع NetworkPolicy لتقييد الوصول. إذا كان LoadBalancer ضرورياً، تأكد من تقييد الوصول عبرannotations أو سياسات الشبكة.",
+      "resource": "Service/insecure-nginx-svc",
+      "severity": "Medium"
+    },
+    {
+      "category": "BestPractice",
+      "container": "",
+      "fix": "إضافة NetworkPolicy في مساحة الأسماء:\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny\n  namespace: shieldops-k8s-test\nspec:\n  podSelector: {}",
+      "issue": "لا يوجد NetworkPolicy لتقييد حركة المرور بين المساحات الأسماء.",
+      "message": "لا يوجد NetworkPolicy لتقييد حركة المرور بين المساحات الأسماء.",
+      "recommendation": "إضافة NetworkPolicy في مساحة الأسماء:\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: default-deny\n  namespace: shieldops-k8s-test\nspec:\n  podSelector: {}",
+      "resource": "Namespace/shieldops-k8s-test",
+      "severity": "Medium"
+    }
+  ],
+  "scan_id": "e333898edc374047a8568575347505d8",
+  "score": 10,
+  "stats": {
+    "issues_found": 13,
+    "scanned": 3,
+    "score": 10,
+    "total_issues": 13
+  },
+  "summary": "تم اكتشاف 11 مشكلة أمنية وت可靠性 في الموارد الممسوحة ضوئيا، بما في ذلك حاويات ذات صلاحيات عالية، وتشغيل كجذر، وتسرّب أسرار، وملفات تعريف安全工作 غير مهيأة.",
+  "total_issues": 13,
+  "v2_scan": {
+    "analysis_version": "2.0",
+    "issues": [
+      {
+        "category": "Security",
+        "container": "",
+        "issue": "المجلد 'host-root' يستخدم hostPath: يسمح بالوصول لنظام ملفات الخادم",
+        "recommendation": "تجنب hostPath. استخدم PersistentVolumeClaim أو emptyDir أو ConfigMap بدلاً منه.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "high"
+      },
+      {
+        "category": "Security",
+        "container": "",
+        "issue": "رمز حساب الخدمة يُثبَّت تلقائياً (الافتراضي: true)",
+        "recommendation": "عيّن automountServiceAccountToken: false إلا إذا كان الـ Pod يحتاج وصولاً لـ Kubernetes API.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "medium"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "issue": "الحاوية تعمل بصلاحيات root (لا يوجد runAsNonRoot)",
+        "recommendation": "عيّن securityContext.runAsNonRoot: true و runAsUser: 1000.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "high"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "issue": "حاوية بصلاحيات كاملة: وصول تام للمضيف",
+        "recommendation": "احذف privileged: true؛ استخدم securityContext.capabilities.add لصلاحيات محددة.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "critical"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "issue": "لا حدود للمعالج/الذاكرة: خطر إيقاف OOM",
+        "recommendation": "حدد resources.limits.cpu و resources.limits.memory.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "medium"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "issue": "وسم الصورة :latest أو غائب",
+        "recommendation": "ثبّت إصداراً محدداً (مثل nginx:1.25.3).",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "high"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "issue": "لا يوجد livenessProbe: قد تمر أعطال الحاوية دون كشف",
+        "recommendation": "أضف livenessProbe (نوع HTTP أو TCP أو exec) لإعادة التشغيل عند الفشل.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "medium"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "issue": "لا يوجد readinessProbe: قد يصل الترافيك لحاويات غير جاهزة",
+        "recommendation": "أضف readinessProbe لمنع وصول الترافيك للـ pods غير الجاهزة.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "low"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "issue": "allowPrivilegeEscalation لم يتم تعطيله",
+        "recommendation": "عيّن securityContext.allowPrivilegeEscalation: false.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "high"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "issue": "نظام الملفات الجذري قابل للكتابة",
+        "recommendation": "عيّن securityContext.readOnlyRootFilesystem: true واستخدم emptyDir للمسارات القابلة للكتابة.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "medium"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "issue": "المتغير 'AWS_SECRET_ACCESS_KEY' يحتوي على قيمة سرية مكتوبة مباشرة",
+        "recommendation": "استخدم valueFrom.secretKeyRef للإشارة إلى Kubernetes Secret بدلاً من كتابة القيمة مباشرة.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "high"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "issue": "imagePullPolicy هو 'غائب' لصورة :latest",
+        "recommendation": "عيّن imagePullPolicy: Always لوسم :latest، أو ثبّت إصداراً محدداً واستخدم IfNotPresent.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "medium"
+      },
+      {
+        "category": "Security",
+        "container": "",
+        "issue": "LoadBalancer مكشوف على الإنترنت بدون قيود على عناوين IP",
+        "recommendation": "أضف loadBalancerSourceRanges لتحديد CIDR الموثوقة، أو استخدم ClusterIP + Ingress بدلاً من ذلك.",
+        "resource": "Service/insecure-nginx-svc",
+        "severity": "high"
+      },
+      {
+        "category": "Security",
+        "container": "",
+        "issue": "لا توجد NetworkPolicy تستهدف هذا Deployment: جميع الـ pods يمكنها التواصل بحرية",
+        "recommendation": "أنشئ NetworkPolicy مع podSelector يطابق labels هذا الـ workload لتقييد ingress/egress.",
+        "resource": "Deployment/insecure-nginx",
+        "severity": "low"
+      }
+    ],
+    "lang": "ar",
+    "resources_scanned": 3,
+    "results": [
+      {
+        "category": "Security",
+        "fix": "تجنب hostPath. استخدم PersistentVolumeClaim أو emptyDir أو ConfigMap بدلاً منه.",
+        "message": "المجلد 'host-root' يستخدم hostPath: يسمح بالوصول لنظام ملفات الخادم",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "hostpath-volume",
+        "severity": "High"
+      },
+      {
+        "category": "Security",
+        "fix": "عيّن automountServiceAccountToken: false إلا إذا كان الـ Pod يحتاج وصولاً لـ Kubernetes API.",
+        "message": "رمز حساب الخدمة يُثبَّت تلقائياً (الافتراضي: true)",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "auto-mount-sa-token",
+        "severity": "Medium"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "fix": "عيّن securityContext.runAsNonRoot: true و runAsUser: 1000.",
+        "message": "الحاوية تعمل بصلاحيات root (لا يوجد runAsNonRoot)",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "root-user",
+        "severity": "High"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "fix": "احذف privileged: true؛ استخدم securityContext.capabilities.add لصلاحيات محددة.",
+        "message": "حاوية بصلاحيات كاملة: وصول تام للمضيف",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "privileged",
+        "severity": "Critical"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "fix": "حدد resources.limits.cpu و resources.limits.memory.",
+        "message": "لا حدود للمعالج/الذاكرة: خطر إيقاف OOM",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "no-resource-limits",
+        "severity": "Medium"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "fix": "ثبّت إصداراً محدداً (مثل nginx:1.25.3).",
+        "message": "وسم الصورة :latest أو غائب",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "latest-tag",
+        "severity": "High"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "fix": "أضف livenessProbe (نوع HTTP أو TCP أو exec) لإعادة التشغيل عند الفشل.",
+        "message": "لا يوجد livenessProbe: قد تمر أعطال الحاوية دون كشف",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "no-liveness-probe",
+        "severity": "Medium"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "fix": "أضف readinessProbe لمنع وصول الترافيك للـ pods غير الجاهزة.",
+        "message": "لا يوجد readinessProbe: قد يصل الترافيك لحاويات غير جاهزة",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "no-readiness-probe",
+        "severity": "Low"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "fix": "عيّن securityContext.allowPrivilegeEscalation: false.",
+        "message": "allowPrivilegeEscalation لم يتم تعطيله",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "privilege-escalation",
+        "severity": "High"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "fix": "عيّن securityContext.readOnlyRootFilesystem: true واستخدم emptyDir للمسارات القابلة للكتابة.",
+        "message": "نظام الملفات الجذري قابل للكتابة",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "read-only-root",
+        "severity": "Medium"
+      },
+      {
+        "category": "Security",
+        "container": "nginx",
+        "fix": "استخدم valueFrom.secretKeyRef للإشارة إلى Kubernetes Secret بدلاً من كتابة القيمة مباشرة.",
+        "message": "المتغير 'AWS_SECRET_ACCESS_KEY' يحتوي على قيمة سرية مكتوبة مباشرة",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "hardcoded-secret",
+        "severity": "High"
+      },
+      {
+        "category": "Reliability",
+        "container": "nginx",
+        "fix": "عيّن imagePullPolicy: Always لوسم :latest، أو ثبّت إصداراً محدداً واستخدم IfNotPresent.",
+        "message": "imagePullPolicy هو 'غائب' لصورة :latest",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "wrong-image-pull-policy",
+        "severity": "Medium"
+      },
+      {
+        "category": "Security",
+        "fix": "أضف loadBalancerSourceRanges لتحديد CIDR الموثوقة، أو استخدم ClusterIP + Ingress بدلاً من ذلك.",
+        "message": "LoadBalancer مكشوف على الإنترنت بدون قيود على عناوين IP",
+        "resource": "Service/insecure-nginx-svc",
+        "rule_id": "loadbalancer-unrestricted",
+        "severity": "High"
+      },
+      {
+        "category": "Security",
+        "fix": "أنشئ NetworkPolicy مع podSelector يطابق labels هذا الـ workload لتقييد ingress/egress.",
+        "message": "لا توجد NetworkPolicy تستهدف هذا Deployment: جميع الـ pods يمكنها التواصل بحرية",
+        "resource": "Deployment/insecure-nginx",
+        "rule_id": "no-network-policy",
+        "severity": "Low"
+      }
+    ],
+    "stats": {
+      "issues_found": 14,
+      "scanned": 3,
+      "score": "0%"
+    },
+    "summary": "تم اكتشاف 14 مشكلة: ⚫ 1 Critical, 🔴 6 High, 🟡 5 Medium, 🟢 2 Low",
+    "total_issues": 14
+  }
+}
