@@ -1,0 +1,4 @@
+# Dockerfile Analysis Report
+Language: dockerfile
+Dependencies:
+- php:8.2-apache  [docker]
